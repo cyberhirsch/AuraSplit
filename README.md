@@ -13,30 +13,30 @@ AuraSplit is a high-performance, silence-detection based audio splitting tool. I
 ## Preview
 ![AuraSplit UI](screenshot.png)
 
-## How to Run
+## How to Run (Windows - Recommended)
+1.  **Install**: Double-click `install.bat`. This will set up your virtual environment and install all dependencies.
+2.  **Run**: Double-click `run.bat`. This will launch both the backend and frontend.
+
+## Manual Setup
+If you are not on Windows or prefer manual setup:
 
 ### 1. Requirements
 - **Python 3.10+**: For the backend API.
 - **Node.js**: For the React frontend.
 - **FFmpeg**: Ensure `ffmpeg` and `ffprobe` are installed and accessible. 
 
-### 2. Configure FFmpeg
-The tool attempts to find FFmpeg automatically. If it's not in your PATH, edit `backend/main.py` and update the `FFMPEG_PATH` variable.
-
-### 3. Start the Backend
+### 2. Start the Backend
 ```powershell
 pip install -r backend/requirements.txt
 python backend/main.py
 ```
-The backend will run on `http://localhost:8000`.
 
-### 4. Start the Frontend
+### 3. Start the Frontend
 ```powershell
 cd frontend
 npm install
 npm run dev
 ```
-The UI will be available at `http://localhost:5173`.
 
 ## How to Use
 1.  **Enter Path**: Paste the absolute folder path containing your audio files.
