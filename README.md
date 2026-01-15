@@ -11,7 +11,7 @@ AuraSplit is a high-performance, silence-detection based audio splitting tool. I
 - **⚡ Real-time Feedback**: Live status updates and progress tracking.
 
 ## Preview
-![AuraSplit UI](https://raw.githubusercontent.com/cyberhirsch/AuraSplit/main/screenshot.png) *(Upload your screenshot here to display it)*
+![AuraSplit UI](https://raw.githubusercontent.com/cyberhirsch/AuraSplit/screenshot.png) *(Upload your screenshot here to display it)*
 
 ## How to Run
 
