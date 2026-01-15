@@ -11,6 +11,8 @@ function App() {
   const [minLength, setMinLength] = useState(20.0);
   const [useSubfolder, setUseSubfolder] = useState(true);
   const [status, setStatus] = useState('');
+  const [totalFiles, setTotalFiles] = useState(0);
+  const [processedFiles, setProcessedFiles] = useState(0);
 
   const scanFolder = async () => {
     if (!folderPath) return;
@@ -54,15 +56,47 @@ function App() {
       });
       const data = await response.json();
       if (response.ok) {
-        setStatus(`Successfully split into ${data.splits} parts.`);
+        return { success: true, splits: data.splits };
       } else {
-        setStatus(`Error: ${data.detail}`);
+        return { success: false, detail: data.detail };
       }
     } catch (err) {
-      setStatus('Splitting failed.');
+      return { success: false, detail: 'Connection error' };
     } finally {
       setSplitting(null);
     }
+  };
+
+  const handleSingleSplit = async (filePath) => {
+    const result = await splitFile(filePath);
+    if (result.success) {
+      setStatus(`Successfully split into ${result.splits} parts.`);
+    } else {
+      setStatus(`Error: ${result.detail}`);
+    }
+  };
+
+  const splitAll = async () => {
+    if (files.length === 0) return;
+    setLoading(true);
+    setTotalFiles(files.length);
+    setProcessedFiles(0);
+
+    for (let i = 0; i < files.length; i++) {
+      setProcessedFiles(i + 1);
+      setStatus(`Processing file ${i + 1} of ${files.length}: ${files[i].name}`);
+      const result = await splitFile(files[i].path);
+      if (!result.success) {
+        setStatus(`Stopped at ${files[i].name}: ${result.detail}`);
+        setLoading(false);
+        return;
+      }
+    }
+
+    setStatus(`Successfully split all ${files.length} files.`);
+    setLoading(false);
+    setTotalFiles(0);
+    setProcessedFiles(0);
   };
 
   const formatSize = (bytes) => {
@@ -90,8 +124,17 @@ function App() {
           />
         </div>
         <button onClick={scanFolder} disabled={loading}>
-          {loading ? <div className="loader"></div> : 'Scan Folder'}
+          {loading && !totalFiles ? <div className="loader"></div> : 'Scan Folder'}
         </button>
+        {files.length > 0 && (
+          <button
+            onClick={splitAll}
+            disabled={loading}
+            style={{ background: 'linear-gradient(to right, #6366f1, #f43f5e)' }}
+          >
+            {loading && totalFiles ? <div className="loader"></div> : 'Split All'}
+          </button>
+        )}
       </div>
 
       <div className="controls">
@@ -143,7 +186,10 @@ function App() {
       </div>
 
       <div style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-        Status: <span style={{ color: 'var(--text)' }}>{status}</span>
+        Status: <span style={{ color: 'var(--text)' }}>
+          {status}
+          {totalFiles > 0 && ` (${processedFiles}/${totalFiles})`}
+        </span>
       </div>
 
       <div className="files-list">
@@ -154,8 +200,8 @@ function App() {
               <p>{formatSize(file.size)} • {file.path}</p>
             </div>
             <button
-              onClick={() => splitFile(file.path)}
-              disabled={splitting === file.path}
+              onClick={() => handleSingleSplit(file.path)}
+              disabled={splitting === file.path || loading}
               style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}
             >
               {splitting === file.path ? <div className="loader"></div> : 'Split'}
