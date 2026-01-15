@@ -85,7 +85,8 @@ async def split_audio(request: SplitRequest):
         "-"
     ]
     
-    process = subprocess.Popen(cmd, stderr=subprocess.PIPE, text=True)
+    # Use errors="replace" and handle potential encoding issues on Windows
+    process = subprocess.Popen(cmd, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace')
     _, stderr = process.communicate()
     
     starts = re.findall(r"silence_start: ([\d\.]+)", stderr)
@@ -102,7 +103,13 @@ async def split_audio(request: SplitRequest):
         "-of", "default=noprint_wrappers=1:nokey=1",
         request.file_path
     ]
-    total_duration = float(subprocess.check_output(duration_cmd).decode().strip())
+    try:
+        output = subprocess.check_output(duration_cmd, text=True, encoding='utf-8', errors='replace').strip()
+        total_duration = float(output)
+    except Exception as e:
+        print(f"Error getting duration: {e}")
+        # Fallback or re-raise
+        raise HTTPException(status_code=500, detail=f"Failed to parse audio duration: {str(e)}")
     
     # Initial segments based on silence
     raw_segments = []
